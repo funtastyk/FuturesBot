@@ -6,6 +6,7 @@ using FuturesBot.Helpers;
 using FuturesBot.Models;
 using FuturesBot.Views;
 using Microsoft.Web.WebView2.Core;
+using Binance.Net;
 
 namespace FuturesBot
 {
@@ -17,10 +18,10 @@ namespace FuturesBot
         {
             InitializeComponent();
 
-            // Загрузка ключей из JSON
             var settings = SettingsManager.Load();
             string apiKey = settings.ApiKey;
             string secretKey = settings.SecretKey;
+            bool useTestnet = settings.UseTestnet;
 
             if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(secretKey))
             {
@@ -28,7 +29,9 @@ namespace FuturesBot
                 return;
             }
 
-            _binanceService = new BinanceService(apiKey, secretKey);
+            BinanceEnvironment environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
+
+            _binanceService = new BinanceService(apiKey, secretKey, environment);
 
             try
             {
@@ -40,7 +43,6 @@ namespace FuturesBot
                 Log($"Ошибка установки плеча: {ex.Message}");
             }
 
-            // Подписка на события WebView2
             BrowserView.NavigationCompleted += BrowserView_NavigationCompleted;
             BrowserView.CoreWebView2InitializationCompleted += BrowserView_CoreWebView2InitializationCompleted;
         }
@@ -137,18 +139,17 @@ namespace FuturesBot
             await _binanceService.CloseAllPositions("BTCUSDT");
         }
 
-        // Открытие окна настроек
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
             var settingsWindow = new SettingsWindow();
             settingsWindow.Owner = this;
+
             if (settingsWindow.ShowDialog() == true)
             {
-                MessageBox.Show("Настройки применены. Перезапустите приложение для их применения.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Настройки применены. Для смены сети перезапустите приложение.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
-        // Кнопка перехода на тестовую сеть Binance Futures
         private void TestnetButton_Click(object sender, RoutedEventArgs e)
         {
             string url = "https://testnet.binancefuture.com/";
@@ -156,7 +157,6 @@ namespace FuturesBot
             AddressBar.Text = url;
         }
 
-        // Кнопка перехода на Live Binance Futures
         private void LiveButton_Click(object sender, RoutedEventArgs e)
         {
             string url = "https://www.binance.com/ru/futures/home";

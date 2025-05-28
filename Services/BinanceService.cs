@@ -13,14 +13,14 @@ namespace FuturesBot.Services
         private readonly BinanceRestClient _restClient;
         private readonly BinanceSocketClient _socketClient;
 
-        public BinanceService(string apiKey, string secretKey)
+        public BinanceService(string apiKey, string secretKey, BinanceEnvironment environment)
         {
             var credentials = new ApiCredentials(apiKey, secretKey);
 
             _restClient = new BinanceRestClient(options =>
             {
                 options.ApiCredentials = credentials;
-                options.Environment = BinanceEnvironment.Testnet;
+                options.Environment = environment;      // <- здесь используем переданное окружение
                 options.AutoTimestamp = true;
                 options.ReceiveWindow = TimeSpan.FromSeconds(5);
                 options.AllowAppendingClientOrderId = false;
@@ -32,7 +32,7 @@ namespace FuturesBot.Services
             _socketClient = new BinanceSocketClient(options =>
             {
                 options.ApiCredentials = credentials;
-                options.Environment = BinanceEnvironment.Testnet;
+                options.Environment = environment;      // <- и здесь
                 options.AllowAppendingClientOrderId = false;
                 options.SocketSubscriptionsCombineTarget = 10;
 

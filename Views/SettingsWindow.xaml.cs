@@ -13,6 +13,7 @@ namespace FuturesBot.Views
             var settings = SettingsManager.Load();
             ApiKeyBox.Text = settings.ApiKey;
             SecretKeyBox.Text = settings.SecretKey;
+            UseTestnetCheckBox.IsChecked = settings.UseTestnet;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -20,7 +21,8 @@ namespace FuturesBot.Views
             var settings = new AppSettings
             {
                 ApiKey = ApiKeyBox.Text.Trim(),
-                SecretKey = SecretKeyBox.Text.Trim()
+                SecretKey = SecretKeyBox.Text.Trim(),
+                UseTestnet = UseTestnetCheckBox.IsChecked ?? true
             };
 
             SettingsManager.Save(settings);
@@ -31,7 +33,6 @@ namespace FuturesBot.Views
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
             Close();
         }
     }
