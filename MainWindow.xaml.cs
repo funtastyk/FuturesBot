@@ -147,5 +147,21 @@ namespace FuturesBot
                 MessageBox.Show("Настройки применены. Перезапустите приложение для их применения.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
+        // Кнопка перехода на тестовую сеть Binance Futures
+        private void TestnetButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://testnet.binancefuture.com/";
+            BrowserView.Source = new Uri(url);
+            AddressBar.Text = url;
+        }
+
+        // Кнопка перехода на Live Binance Futures
+        private void LiveButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://www.binance.com/ru/futures/home";
+            BrowserView.Source = new Uri(url);
+            AddressBar.Text = url;
+        }
     }
 }

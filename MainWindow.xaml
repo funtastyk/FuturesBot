@@ -17,14 +17,21 @@
         <DockPanel Grid.Row="0">
 
             <!-- Навигационная панель сверху -->
-            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" DockPanel.Dock="Left">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10" Height="40" LastChildFill="False">
+
+                <!-- Левая часть: Назад, Вперёд и адресная строка -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" DockPanel.Dock="Left" VerticalAlignment="Center">
                     <Button x:Name="BackButton" Content="← Назад" Width="80" Margin="5,0" Click="BackButton_Click" IsEnabled="False"/>
                     <Button x:Name="ForwardButton" Content="Вперёд →" Width="80" Margin="5,0" Click="ForwardButton_Click" IsEnabled="False"/>
+                    <TextBox x:Name="AddressBar" Width="600" Margin="10,0,0,0" VerticalAlignment="Center"
+                             KeyDown="AddressBar_KeyDown" Text="https://www.binance.com/en/futures/BTCUSDT"/>
                 </StackPanel>
 
-                <TextBox x:Name="AddressBar" Margin="10,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Right"
-                         KeyDown="AddressBar_KeyDown" Width="600" Text="https://www.binance.com/en/futures/BTCUSDT"/>
+                <!-- Правая часть: Кнопки-закладки -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <Button Content="Test Binance" Width="120" Margin="5,0" Click="TestnetButton_Click"/>
+                    <Button Content="Live Binance" Width="120" Margin="5,0" Click="LiveButton_Click"/>
+                </StackPanel>
             </DockPanel>
 
             <!-- Панель управления снизу браузера -->
