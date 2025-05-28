@@ -12,11 +12,9 @@ namespace FuturesBot
         {
             InitializeComponent();
 
-            // Укажи свои тестовые ключи
             string apiKey = "YOUR_TESTNET_API_KEY";
             string secretKey = "YOUR_TESTNET_SECRET";
 
-            // Убираем третий параметр Log, вызываем только с двумя
             _binanceService = new BinanceService(apiKey, secretKey);
 
             try
