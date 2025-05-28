@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Input;
 using FuturesBot.Services;
 using FuturesBot.Helpers;
 using FuturesBot.Models;
@@ -39,13 +40,29 @@ namespace FuturesBot
                 Log($"Ошибка установки плеча: {ex.Message}");
             }
 
-            // Подписка на событие завершения навигации WebView2
+            // Подписка на события WebView2
             BrowserView.NavigationCompleted += BrowserView_NavigationCompleted;
+            BrowserView.CoreWebView2InitializationCompleted += BrowserView_CoreWebView2InitializationCompleted;
+        }
+
+        private void BrowserView_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                BrowserView.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
+            }
+        }
+
+        private void CoreWebView2_SourceChanged(object sender, CoreWebView2SourceChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AddressBar.Text = BrowserView.Source?.AbsoluteUri ?? "";
+            });
         }
 
         private void BrowserView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
-            // Обновляем доступность кнопок назад/вперёд
             BackButton.IsEnabled = BrowserView.CanGoBack;
             ForwardButton.IsEnabled = BrowserView.CanGoForward;
         }
@@ -60,6 +77,28 @@ namespace FuturesBot
         {
             if (BrowserView.CanGoForward)
                 BrowserView.GoForward();
+        }
+
+        private void AddressBar_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                string url = AddressBar.Text.Trim();
+
+                if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+                {
+                    url = "https://" + url;
+                }
+
+                try
+                {
+                    BrowserView.Source = new Uri(url);
+                }
+                catch (UriFormatException)
+                {
+                    Log("❌ Некорректный URL");
+                }
+            }
         }
 
         private void Log(string message)
@@ -105,7 +144,6 @@ namespace FuturesBot
             settingsWindow.Owner = this;
             if (settingsWindow.ShowDialog() == true)
             {
-                // Перезапуск MainWindow с обновлёнными ключами
                 MessageBox.Show("Настройки применены. Перезапустите приложение для их применения.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }

@@ -15,6 +15,18 @@
 
         <!-- ВЕРХНЯЯ ЧАСТЬ -->
         <DockPanel Grid.Row="0">
+
+            <!-- Навигационная панель сверху -->
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" DockPanel.Dock="Left">
+                    <Button x:Name="BackButton" Content="← Назад" Width="80" Margin="5,0" Click="BackButton_Click" IsEnabled="False"/>
+                    <Button x:Name="ForwardButton" Content="Вперёд →" Width="80" Margin="5,0" Click="ForwardButton_Click" IsEnabled="False"/>
+                </StackPanel>
+
+                <TextBox x:Name="AddressBar" Margin="10,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Right"
+                         KeyDown="AddressBar_KeyDown" Width="600" Text="https://www.binance.com/en/futures/BTCUSDT"/>
+            </DockPanel>
+
             <!-- Панель управления снизу браузера -->
             <DockPanel DockPanel.Dock="Bottom" LastChildFill="True" Margin="0,10,0,10" MinHeight="60">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -32,12 +44,6 @@
                 <!-- Кнопка настроек справа -->
                 <Button Content="⚙️ Настройки" Width="120" HorizontalAlignment="Right" Margin="10,0" Click="OpenSettings_Click"/>
             </DockPanel>
-
-            <!-- Навигационные кнопки слева сверху -->
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
-                <Button x:Name="BackButton" Content="← Назад" Width="80" Margin="5,0" Click="BackButton_Click" IsEnabled="False"/>
-                <Button x:Name="ForwardButton" Content="Вперёд →" Width="80" Margin="5,0" Click="ForwardButton_Click" IsEnabled="False"/>
-            </StackPanel>
 
             <!-- WebView2 занимает всё оставшееся пространство сверху -->
             <wv2:WebView2 Name="BrowserView" Source="https://www.binance.com/en/futures/BTCUSDT" />
