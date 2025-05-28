@@ -1,19 +1,30 @@
 ﻿using System;
 using System.Windows;
 using FuturesBot.Services;
+using FuturesBot.Helpers;
+using FuturesBot.Models;
+using FuturesBot.Views;
 
 namespace FuturesBot
 {
     public partial class MainWindow : Window
     {
-        private readonly BinanceService _binanceService;
+        private BinanceService _binanceService;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            string apiKey = "YOUR_TESTNET_API_KEY";
-            string secretKey = "YOUR_TESTNET_SECRET";
+            // Загрузка ключей из JSON
+            var settings = SettingsManager.Load();
+            string apiKey = settings.ApiKey;
+            string secretKey = settings.SecretKey;
+
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(secretKey))
+            {
+                Log("⚠️ API ключи не заданы. Откройте настройки.");
+                return;
+            }
 
             _binanceService = new BinanceService(apiKey, secretKey);
 
@@ -62,6 +73,18 @@ namespace FuturesBot
         private async void ClosePositionButton_Click(object sender, RoutedEventArgs e)
         {
             await _binanceService.CloseAllPositions("BTCUSDT");
+        }
+
+        // Открытие окна настроек
+        private void OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsWindow();
+            settingsWindow.Owner = this;
+            if (settingsWindow.ShowDialog() == true)
+            {
+                // Перезапуск MainWindow с обновлёнными ключами
+                MessageBox.Show("Настройки применены. Перезапустите приложение для их применения.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }

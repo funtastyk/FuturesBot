@@ -16,17 +16,22 @@
         <!-- ВЕРХНЯЯ ЧАСТЬ -->
         <DockPanel Grid.Row="0">
             <!-- Панель управления снизу браузера -->
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center" MinHeight="60">
-                <Label Content="Quantity:" VerticalAlignment="Center" Margin="5,0"/>
-                <TextBox x:Name="QuantityBox" Width="100" Text="0.01" Margin="5,0"/>
+            <DockPanel DockPanel.Dock="Bottom" LastChildFill="True" Margin="0,10,0,10" MinHeight="60">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Label Content="Quantity:" VerticalAlignment="Center" Margin="5,0"/>
+                    <TextBox x:Name="QuantityBox" Width="100" Text="0.01" Margin="5,0"/>
 
-                <Label Content="Leverage:" VerticalAlignment="Center" Margin="5,0"/>
-                <TextBox x:Name="LeverageBox" Width="50" Text="20" Margin="5,0"/>
+                    <Label Content="Leverage:" VerticalAlignment="Center" Margin="5,0"/>
+                    <TextBox x:Name="LeverageBox" Width="50" Text="20" Margin="5,0"/>
 
-                <Button x:Name="OpenLongButton" Content="Open Long" Width="100" Click="OpenLongButton_Click" Margin="5,0"/>
-                <Button x:Name="OpenShortButton" Content="Open Short" Width="100" Click="OpenShortButton_Click" Margin="5,0"/>
-                <Button x:Name="ClosePositionButton" Content="Close Position" Width="120" Click="ClosePositionButton_Click" Margin="5,0"/>
-            </StackPanel>
+                    <Button x:Name="OpenLongButton" Content="Open Long" Width="100" Click="OpenLongButton_Click" Margin="5,0"/>
+                    <Button x:Name="OpenShortButton" Content="Open Short" Width="100" Click="OpenShortButton_Click" Margin="5,0"/>
+                    <Button x:Name="ClosePositionButton" Content="Close Position" Width="120" Click="ClosePositionButton_Click" Margin="5,0"/>
+                </StackPanel>
+
+                <!-- Кнопка настроек справа -->
+                <Button Content="⚙️ Настройки" Width="120" HorizontalAlignment="Right" Margin="10,0" Click="OpenSettings_Click"/>
+            </DockPanel>
 
             <!-- WebView2 занимает всё оставшееся пространство сверху -->
             <wv2:WebView2 Name="BrowserView" Source="https://www.binance.com/en/futures/BTCUSDT" />
