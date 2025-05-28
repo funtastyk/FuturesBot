@@ -33,6 +33,12 @@
                 <Button Content="⚙️ Настройки" Width="120" HorizontalAlignment="Right" Margin="10,0" Click="OpenSettings_Click"/>
             </DockPanel>
 
+            <!-- Навигационные кнопки слева сверху -->
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                <Button x:Name="BackButton" Content="← Назад" Width="80" Margin="5,0" Click="BackButton_Click" IsEnabled="False"/>
+                <Button x:Name="ForwardButton" Content="Вперёд →" Width="80" Margin="5,0" Click="ForwardButton_Click" IsEnabled="False"/>
+            </StackPanel>
+
             <!-- WebView2 занимает всё оставшееся пространство сверху -->
             <wv2:WebView2 Name="BrowserView" Source="https://www.binance.com/en/futures/BTCUSDT" />
         </DockPanel>

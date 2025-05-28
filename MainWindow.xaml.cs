@@ -4,6 +4,7 @@ using FuturesBot.Services;
 using FuturesBot.Helpers;
 using FuturesBot.Models;
 using FuturesBot.Views;
+using Microsoft.Web.WebView2.Core;
 
 namespace FuturesBot
 {
@@ -37,6 +38,28 @@ namespace FuturesBot
             {
                 Log($"Ошибка установки плеча: {ex.Message}");
             }
+
+            // Подписка на событие завершения навигации WebView2
+            BrowserView.NavigationCompleted += BrowserView_NavigationCompleted;
+        }
+
+        private void BrowserView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            // Обновляем доступность кнопок назад/вперёд
+            BackButton.IsEnabled = BrowserView.CanGoBack;
+            ForwardButton.IsEnabled = BrowserView.CanGoForward;
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (BrowserView.CanGoBack)
+                BrowserView.GoBack();
+        }
+
+        private void ForwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (BrowserView.CanGoForward)
+                BrowserView.GoForward();
         }
 
         private void Log(string message)
