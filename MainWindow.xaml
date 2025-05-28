@@ -1,0 +1,36 @@
+﻿<Window x:Class="FuturesBot.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="FuturesBot" Height="900" Width="1400">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="600"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- WebView2: окно Binance -->
+        <wv2:WebView2 Grid.Row="0" Name="BrowserView" Source="https://www.binance.com/en/futures/BTCUSDT" />
+
+        <!-- Панель управления -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
+            <Label Content="Quantity:" VerticalAlignment="Center" Margin="5,0"/>
+            <TextBox x:Name="QuantityBox" Width="100" Text="0.01" Margin="5,0"/>
+
+            <Label Content="Leverage:" VerticalAlignment="Center" Margin="5,0"/>
+            <TextBox x:Name="LeverageBox" Width="50" Text="20" Margin="5,0"/>
+
+            <Button x:Name="OpenLongButton" Content="Open Long" Width="100" Click="OpenLongButton_Click" Margin="5,0"/>
+            <Button x:Name="OpenShortButton" Content="Open Short" Width="100" Click="OpenShortButton_Click" Margin="5,0"/>
+            <Button x:Name="ClosePositionButton" Content="Close Position" Width="120" Click="ClosePositionButton_Click" Margin="5,0"/>
+        </StackPanel>
+
+
+        <!-- Лог -->
+        <TextBox Grid.Row="2" x:Name="LogBox" Margin="0" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+    </Grid>
+</Window>
