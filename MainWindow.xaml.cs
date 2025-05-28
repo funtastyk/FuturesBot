@@ -13,6 +13,7 @@ namespace FuturesBot
     public partial class MainWindow : Window
     {
         private BinanceService _binanceService;
+        private BinanceEnvironment _environment;  // Добавил поле для хранения окружения
 
         public MainWindow()
         {
@@ -29,9 +30,11 @@ namespace FuturesBot
                 return;
             }
 
-            BinanceEnvironment environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
+            _environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;  // Сохраняем в поле
 
-            _binanceService = new BinanceService(apiKey, secretKey, environment);
+            _binanceService = new BinanceService(apiKey, secretKey, _environment);
+
+            CheckConnectionAndLogAsync();
 
             try
             {
@@ -46,6 +49,31 @@ namespace FuturesBot
             BrowserView.NavigationCompleted += BrowserView_NavigationCompleted;
             BrowserView.CoreWebView2InitializationCompleted += BrowserView_CoreWebView2InitializationCompleted;
         }
+
+        private async void CheckConnectionAndLogAsync()
+        {
+            try
+            {
+                var (connected, error) = await _binanceService.CheckConnectionAsync();
+
+                string envText = _environment == BinanceEnvironment.Testnet ? "Testnet" : "Live";
+
+                if (connected)
+                {
+                    Log($"✅ Успешное подключение к Binance ({envText})");
+                }
+                else
+                {
+                    Log($"❌ Не удалось подключиться к Binance ({envText}). Ошибка: {error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                string envText = _environment == BinanceEnvironment.Testnet ? "Testnet" : "Live";
+                Log($"❌ Ошибка подключения ({envText}): {ex.Message}");
+            }
+        }
+
 
         private void BrowserView_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
