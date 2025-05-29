@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using FuturesBot.Services;
 using FuturesBot.Helpers;
 using FuturesBot.Models;
 using FuturesBot.Views;
+using FuturesBot.Strategies;
 using Microsoft.Web.WebView2.Core;
 using Binance.Net;
 
@@ -14,6 +17,11 @@ namespace FuturesBot
     {
         private BinanceService _binanceService;
         private BinanceEnvironment _environment;
+        private bool _isAutoTradingEnabled = false;
+
+        private CancellationTokenSource? _tradingCts;
+        private Task? _tradingTask;
+        private MomentumScalpingStrategy? _strategy;
 
         public MainWindow()
         {
@@ -31,8 +39,8 @@ namespace FuturesBot
             }
 
             _environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
-
             _binanceService = new BinanceService(apiKey, secretKey, _environment);
+            _strategy = new MomentumScalpingStrategy(_binanceService);
 
             CheckConnectionAndLogAsync();
 
@@ -151,6 +159,59 @@ namespace FuturesBot
             string url = "https://www.binance.com/ru/futures/home";
             BrowserView.Source = new Uri(url);
             AddressBar.Text = url;
+        }
+
+        private void ToggleAutoTrading_Click(object sender, RoutedEventArgs e)
+        {
+            _isAutoTradingEnabled = !_isAutoTradingEnabled;
+            ToggleAutoTradingButton.Content = _isAutoTradingEnabled ? "🟢 Автоторговля ВКЛ" : "⚪ Автоторговля ВЫКЛ";
+            Log($"🔁 Автоторговля: {(_isAutoTradingEnabled ? "включена" : "отключена")}");
+
+            if (_isAutoTradingEnabled)
+            {
+                StartStrategy();
+            }
+            else
+            {
+                StopStrategy();
+            }
+        }
+
+        private void StartStrategy()
+        {
+            if (_strategy == null || _tradingTask != null)
+                return;
+
+            _tradingCts = new CancellationTokenSource();
+            var token = _tradingCts.Token;
+
+            _tradingTask = Task.Run(async () =>
+            {
+                Log("▶️ Стратегия запущена.");
+                while (!token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await _strategy.EvaluateAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"❗ Ошибка в стратегии: {ex.Message}");
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(10), token);
+                }
+                Log("⏹️ Стратегия остановлена.");
+            }, token);
+        }
+
+        private void StopStrategy()
+        {
+            if (_tradingCts == null)
+                return;
+
+            _tradingCts.Cancel();
+            _tradingTask = null;
         }
     }
 }

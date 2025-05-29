@@ -39,13 +39,16 @@
         <!-- Контейнер кнопки и лога -->
         <Grid Grid.Row="3">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>    <!-- Кнопка -->
+                <RowDefinition Height="Auto"/>    <!-- Кнопки -->
                 <RowDefinition Height="*"/>       <!-- Лог -->
             </Grid.RowDefinitions>
 
-            <!-- Только кнопка ⚙️ -->
+            <!-- Кнопки -->
             <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,10,0,10" MinHeight="60">
-                <Button Content="⚙️" Width="60" HorizontalAlignment="Right" Margin="10,0" Click="OpenSettings_Click"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button x:Name="ToggleAutoTradingButton" Content="⚪ Автоторговля ВЫКЛ" Width="180" Margin="0,0,10,0" Click="ToggleAutoTrading_Click"/>
+                </StackPanel>
+                <Button Content="⚙️" Width="60" HorizontalAlignment="Right" Margin="10,0,0,0" Click="OpenSettings_Click"/>
             </DockPanel>
 
             <!-- Лог -->
