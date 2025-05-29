@@ -13,7 +13,7 @@ namespace FuturesBot
     public partial class MainWindow : Window
     {
         private BinanceService _binanceService;
-        private BinanceEnvironment _environment;  // Добавил поле для хранения окружения
+        private BinanceEnvironment _environment;
 
         public MainWindow()
         {
@@ -30,21 +30,11 @@ namespace FuturesBot
                 return;
             }
 
-            _environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;  // Сохраняем в поле
+            _environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
 
             _binanceService = new BinanceService(apiKey, secretKey, _environment);
 
             CheckConnectionAndLogAsync();
-
-            try
-            {
-                int leverage = int.Parse(LeverageBox.Text);
-                _binanceService.SetLeverage("BTCUSDT", leverage);
-            }
-            catch (Exception ex)
-            {
-                Log($"Ошибка установки плеча: {ex.Message}");
-            }
 
             BrowserView.NavigationCompleted += BrowserView_NavigationCompleted;
             BrowserView.CoreWebView2InitializationCompleted += BrowserView_CoreWebView2InitializationCompleted;
@@ -55,7 +45,6 @@ namespace FuturesBot
             try
             {
                 var (connected, error) = await _binanceService.CheckConnectionAsync();
-
                 string envText = _environment == BinanceEnvironment.Testnet ? "Testnet" : "Live";
 
                 if (connected)
@@ -73,7 +62,6 @@ namespace FuturesBot
                 Log($"❌ Ошибка подключения ({envText}): {ex.Message}");
             }
         }
-
 
         private void BrowserView_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
@@ -138,33 +126,6 @@ namespace FuturesBot
                 LogBox.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
                 LogBox.ScrollToEnd();
             });
-        }
-
-        private async void OpenLongButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!decimal.TryParse(QuantityBox.Text, out var quantity))
-            {
-                Log("❌ Некорректное значение Quantity");
-                return;
-            }
-
-            await _binanceService.OpenMarketPosition("BTCUSDT", quantity, isLong: true);
-        }
-
-        private async void OpenShortButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!decimal.TryParse(QuantityBox.Text, out var quantity))
-            {
-                Log("❌ Некорректное значение Quantity");
-                return;
-            }
-
-            await _binanceService.OpenMarketPosition("BTCUSDT", quantity, isLong: false);
-        }
-
-        private async void ClosePositionButton_Click(object sender, RoutedEventArgs e)
-        {
-            await _binanceService.CloseAllPositions("BTCUSDT");
         }
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)

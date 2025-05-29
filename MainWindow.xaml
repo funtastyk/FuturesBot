@@ -8,59 +8,48 @@
         Title="FuturesBot" Height="900" Width="1400">
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>      <!-- Верхняя область: браузер и кнопки -->
-            <RowDefinition Height="5"/>      <!-- Сплиттер -->
-            <RowDefinition Height="200"/>    <!-- Нижняя область: лог -->
+            <RowDefinition Height="Auto"/>     <!-- Навигация -->
+            <RowDefinition Height="*"/>        <!-- Браузер -->
+            <RowDefinition Height="5"/>        <!-- Сплиттер -->
+            <RowDefinition Height="300"/>      <!-- Контейнер кнопки + лог -->
         </Grid.RowDefinitions>
 
-        <!-- ВЕРХНЯЯ ЧАСТЬ -->
-        <DockPanel Grid.Row="0">
+        <!-- Навигационная панель -->
+        <DockPanel Grid.Row="0" Height="40" Margin="0,0,0,10" LastChildFill="False">
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="BackButton" Content="← Назад" Width="80" Margin="5,0" Click="BackButton_Click" IsEnabled="False"/>
+                <Button x:Name="ForwardButton" Content="Вперёд →" Width="80" Margin="5,0" Click="ForwardButton_Click" IsEnabled="False"/>
+                <TextBox x:Name="AddressBar" Width="600" Margin="10,0,0,0" VerticalAlignment="Center"
+                         KeyDown="AddressBar_KeyDown" Text="https://www.binance.com/en/futures/BTCUSDT"/>
+            </StackPanel>
 
-            <!-- Навигационная панель сверху -->
-            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10" Height="40" LastChildFill="False">
-
-                <!-- Левая часть: Назад, Вперёд и адресная строка -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" DockPanel.Dock="Left" VerticalAlignment="Center">
-                    <Button x:Name="BackButton" Content="← Назад" Width="80" Margin="5,0" Click="BackButton_Click" IsEnabled="False"/>
-                    <Button x:Name="ForwardButton" Content="Вперёд →" Width="80" Margin="5,0" Click="ForwardButton_Click" IsEnabled="False"/>
-                    <TextBox x:Name="AddressBar" Width="600" Margin="10,0,0,0" VerticalAlignment="Center"
-                             KeyDown="AddressBar_KeyDown" Text="https://www.binance.com/en/futures/BTCUSDT"/>
-                </StackPanel>
-
-                <!-- Правая часть: Кнопки-закладки -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center">
-                    <Button Content="Test Binance" Width="120" Margin="5,0" Click="TestnetButton_Click"/>
-                    <Button Content="Live Binance" Width="120" Margin="5,0" Click="LiveButton_Click"/>
-                </StackPanel>
-            </DockPanel>
-
-            <!-- Панель управления снизу браузера -->
-            <DockPanel DockPanel.Dock="Bottom" LastChildFill="True" Margin="0,10,0,10" MinHeight="60">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Label Content="Quantity:" VerticalAlignment="Center" Margin="5,0"/>
-                    <TextBox x:Name="QuantityBox" Width="100" Text="0.01" Margin="5,0"/>
-
-                    <Label Content="Leverage:" VerticalAlignment="Center" Margin="5,0"/>
-                    <TextBox x:Name="LeverageBox" Width="50" Text="20" Margin="5,0"/>
-
-                    <Button x:Name="OpenLongButton" Content="Open Long" Width="100" Click="OpenLongButton_Click" Margin="5,0"/>
-                    <Button x:Name="OpenShortButton" Content="Open Short" Width="100" Click="OpenShortButton_Click" Margin="5,0"/>
-                    <Button x:Name="ClosePositionButton" Content="Close Position" Width="120" Click="ClosePositionButton_Click" Margin="5,0"/>
-                </StackPanel>
-
-                <!-- Кнопка настроек справа -->
-                <Button Content="⚙️ Настройки" Width="120" HorizontalAlignment="Right" Margin="10,0" Click="OpenSettings_Click"/>
-            </DockPanel>
-
-            <!-- WebView2 занимает всё оставшееся пространство сверху -->
-            <wv2:WebView2 Name="BrowserView" Source="https://www.binance.com/en/futures/BTCUSDT" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Test Binance" Width="120" Margin="5,0" Click="TestnetButton_Click"/>
+                <Button Content="Live Binance" Width="120" Margin="5,0" Click="LiveButton_Click"/>
+            </StackPanel>
         </DockPanel>
 
-        <!-- СПЛИТТЕР -->
-        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+        <!-- Браузер -->
+        <wv2:WebView2 Grid.Row="1" Name="BrowserView" Source="https://www.binance.com/en/futures/BTCUSDT" />
+
+        <!-- Сплиттер -->
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                       Background="Gray" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True" />
 
-        <!-- НИЖНЯЯ ЧАСТЬ (ЛОГ) -->
-        <TextBox Grid.Row="2" x:Name="LogBox" Margin="0" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+        <!-- Контейнер кнопки и лога -->
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>    <!-- Кнопка -->
+                <RowDefinition Height="*"/>       <!-- Лог -->
+            </Grid.RowDefinitions>
+
+            <!-- Только кнопка ⚙️ -->
+            <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,10,0,10" MinHeight="60">
+                <Button Content="⚙️" Width="60" HorizontalAlignment="Right" Margin="10,0" Click="OpenSettings_Click"/>
+            </DockPanel>
+
+            <!-- Лог -->
+            <TextBox Grid.Row="1" x:Name="LogBox" Margin="0" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+        </Grid>
     </Grid>
 </Window>
