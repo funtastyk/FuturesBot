@@ -40,12 +40,15 @@ namespace FuturesBot
 
             _environment = useTestnet ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
             _binanceService = new BinanceService(apiKey, secretKey, _environment);
-            _strategy = new MomentumScalpingStrategy(_binanceService);
-
-            CheckConnectionAndLogAsync();
 
             BrowserView.NavigationCompleted += BrowserView_NavigationCompleted;
             BrowserView.CoreWebView2InitializationCompleted += BrowserView_CoreWebView2InitializationCompleted;
+            LeverageTextBox.KeyDown += LeverageTextBox_KeyDown;
+
+            CheckConnectionAndLogAsync();
+
+            UsdAmountTextBox.Text = "10";
+            LeverageTextBox.Text = "1";
         }
 
         private async void CheckConnectionAndLogAsync()
@@ -56,13 +59,9 @@ namespace FuturesBot
                 string envText = _environment == BinanceEnvironment.Testnet ? "Testnet" : "Live";
 
                 if (connected)
-                {
                     Log($"✅ Успешное подключение к Binance ({envText})");
-                }
                 else
-                {
                     Log($"❌ Не удалось подключиться к Binance ({envText}). Ошибка: {error}");
-                }
             }
             catch (Exception ex)
             {
@@ -112,9 +111,7 @@ namespace FuturesBot
                 string url = AddressBar.Text.Trim();
 
                 if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-                {
                     url = "https://" + url;
-                }
 
                 try
                 {
@@ -168,19 +165,33 @@ namespace FuturesBot
             Log($"🔁 Автоторговля: {(_isAutoTradingEnabled ? "включена" : "отключена")}");
 
             if (_isAutoTradingEnabled)
-            {
                 StartStrategy();
-            }
             else
-            {
                 StopStrategy();
-            }
         }
 
         private void StartStrategy()
         {
-            if (_strategy == null || _tradingTask != null)
+            if (_tradingTask != null)
                 return;
+
+            if (!decimal.TryParse(UsdAmountTextBox.Text.Trim(), out decimal usdAmount) || usdAmount <= 0)
+            {
+                Log("❌ Некорректное значение суммы USD. Используйте положительное число.");
+                return;
+            }
+
+            if (!int.TryParse(LeverageTextBox.Text.Trim(), out int leverage) || leverage <= 0)
+            {
+                Log("❌ Некорректное значение плеча. Используйте положительное целое число.");
+                return;
+            }
+
+            _strategy = new MomentumScalpingStrategy(_binanceService)
+            {
+                UsdAmount = usdAmount,
+                Leverage = leverage
+            };
 
             _tradingCts = new CancellationTokenSource();
             var token = _tradingCts.Token;
@@ -212,6 +223,76 @@ namespace FuturesBot
 
             _tradingCts.Cancel();
             _tradingTask = null;
+        }
+
+        private async void LeverageTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (!int.TryParse(LeverageTextBox.Text.Trim(), out int leverage) || leverage <= 0)
+                {
+                    Log("❌ Некорректное значение плеча. Используйте положительное целое число.");
+                    return;
+                }
+
+                try
+                {
+                    bool result = await _binanceService.SetLeverageAsync("BTCUSDT", leverage);
+
+                    if (result)
+                        Log($"🔧 Плечо изменено на {leverage}x.");
+                    else
+                        Log("❌ Не удалось изменить плечо.");
+                }
+                catch (Exception ex)
+                {
+                    Log($"❌ Ошибка при изменении плеча: {ex.Message}");
+                }
+            }
+        }
+
+        private async void OpenPositionButton_Click(object sender, RoutedEventArgs e)
+        {
+            Log("🚀 Попытка открыть позицию...");
+
+            if (!decimal.TryParse(UsdAmountTextBox.Text.Trim(), out decimal usdAmount) || usdAmount <= 0)
+            {
+                Log("❌ Некорректное значение суммы USD. Используйте положительное число.");
+                return;
+            }
+
+            try
+            {
+                var (success, error) = await _binanceService.OpenMarketPosition("BTCUSDT", usdAmount, true);
+
+                if (success)
+                    Log("✅ Позиция LONG успешно открыта.");
+                else
+                    Log($"❌ Не удалось открыть позицию. Ошибка: {error}");
+            }
+            catch (Exception ex)
+            {
+                Log($"❌ Ошибка открытия позиции: {ex.Message}");
+            }
+        }
+
+        private async void ClosePositionButton_Click(object sender, RoutedEventArgs e)
+        {
+            Log("🛑 Попытка закрыть позицию...");
+
+            try
+            {
+                var result = await _binanceService.CloseAllPositions("BTCUSDT");
+
+                if (result)
+                    Log("✅ Позиция успешно закрыта.");
+                else
+                    Log("❌ Не удалось закрыть позицию.");
+            }
+            catch (Exception ex)
+            {
+                Log($"❌ Ошибка закрытия позиции: {ex.Message}");
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ using Binance.Net.Enums;
 using CryptoExchange.Net.Authentication;
 using Binance.Net.Interfaces;
 
-
 namespace FuturesBot.Services
 {
     public class BinanceService
@@ -57,11 +56,9 @@ namespace FuturesBot.Services
             return (true, null);
         }
 
-        
         // Получение свечей (кадлов)
         public async Task<List<IBinanceKline>?> GetCandlesAsync(string symbol, KlineInterval interval, int limit)
         {
-            // Расчёт длины одной свечи (можно оставить для вычислений startTime)
             TimeSpan klineSpan = interval switch
             {
                 KlineInterval.OneMinute => TimeSpan.FromMinutes(1),
@@ -95,20 +92,47 @@ namespace FuturesBot.Services
 
             return result.Data.ToList();
         }
-        
+
+        // Установка плеча для символа
+        public async Task<bool> SetLeverageAsync(string symbol, int leverage)
+        {
+            if (leverage < 1 || leverage > 125) // Binance обычно поддерживает от 1 до 125
+                throw new ArgumentOutOfRangeException(nameof(leverage), "Плечо должно быть от 1 до 125.");
+
+            var result = await _restClient.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, leverage);
+            return result.Success;
+        }
+
         // Открытие рыночной позиции
         // quantity - количество базового актива (например, 0.01 BTC)
-        public async Task<bool> OpenMarketPosition(string symbol, decimal quantity, bool isLong)
+        public async Task<(bool Success, string? ErrorMessage)> OpenMarketPosition(string symbol, decimal usdAmount, bool isLong)
         {
             var side = isLong ? Binance.Net.Enums.OrderSide.Buy : Binance.Net.Enums.OrderSide.Sell;
+
+            // Получаем текущую цену актива
+            var priceResult = await _restClient.UsdFuturesApi.ExchangeData.GetPriceAsync(symbol);
+            if (!priceResult.Success || priceResult.Data.Price <= 0)
+                return (false, "Не удалось получить цену актива.");
+
+            decimal price = priceResult.Data.Price;
+
+            // Считаем количество контрактов
+            decimal quantity = usdAmount / price;
+
+            // Округляем количество до нужной точности (например, 3 знака после запятой)
+            quantity = Math.Round(quantity, 3, MidpointRounding.ToZero);
 
             var orderResult = await _restClient.UsdFuturesApi.Trading.PlaceOrderAsync(
                 symbol,
                 side,
                 Binance.Net.Enums.FuturesOrderType.Market,
-                quantity);
+                quantity
+            );
 
-            return orderResult.Success;
+            if (!orderResult.Success)
+                return (false, orderResult.Error?.Message);
+
+            return (true, null);
         }
 
         // Закрытие всех позиций по символу (путём выставления рыночного ордера в противоположную сторону)
@@ -142,5 +166,3 @@ namespace FuturesBot.Services
         public BinanceEnvironment GetEnvironment() => _environment;
     }
 }
-
-
